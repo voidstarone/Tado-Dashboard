@@ -22,7 +22,19 @@ pip install -r requirements.txt
 python app.py
 ```
 
-Open <http://127.0.0.1:5000>. It auto-refreshes every 30s.
+Open <http://127.0.0.1:6767>. It auto-refreshes every 30s.
+
+This serves via [waitress](https://pypi.org/project/waitress/) (a production
+WSGI server) when it's installed — no dev-server warning — and falls back to
+Flask's dev server otherwise. It binds to `0.0.0.0`, so other devices on your
+LAN can reach it at `http://<this-machine-ip>:6767`.
+
+> **Run it as a single process.** `TadoService` keeps the tado° connection, auth
+> state, and the background reauth thread in memory. Waitress uses one process
+> with a thread pool, which is exactly right. Do **not** switch to a
+> multi-worker/-process server (e.g. `gunicorn -w 4`) — each worker would get
+> its own token client and they'd fight over the rotating refresh token (see
+> below). One process, many threads: fine. Many processes: breaks auth.
 
 **First run / re-login is handled in the browser.** If there's no valid token,
 the dashboard shows a banner with a tado° approval link. Click it, approve the

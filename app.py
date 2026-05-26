@@ -70,5 +70,21 @@ def api_resume(zone_id):
 
 
 if __name__ == "__main__":
-    # Bind to localhost by default; change host/port as needed.
-    app.run(host="127.0.0.1", port=6767)
+    # 0.0.0.0 = listen on all interfaces so other devices on your LAN can reach
+    # it. NOTE: this exposes the dashboard (and thus control of your heating) to
+    # everyone on the network — it has no auth. Keep it on a trusted LAN, or put
+    # a reverse proxy with auth/HTTPS in front. Use 127.0.0.1 for local-only.
+    HOST, PORT = "0.0.0.0", 6767
+
+    # Serve via waitress (production WSGI) when available. It runs a SINGLE
+    # process with a thread pool — important here: one process means one
+    # TadoService, so the rotating refresh token isn't shared/contended. Do NOT
+    # switch to a multi-process/-worker server without rethinking that.
+    try:
+        from waitress import serve
+    except ImportError:
+        print("waitress not installed — falling back to Flask dev server.")
+        app.run(host=HOST, port=PORT)
+    else:
+        print(f"Serving on http://{HOST}:{PORT} (waitress, single process)")
+        serve(app, host=HOST, port=PORT, threads=8)
