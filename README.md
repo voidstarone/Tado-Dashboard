@@ -1,3 +1,7 @@
+# AI SLOP
+
+This is pure ai garbage but it serves my need. Use at your peril.
+
 # tado° web dashboard
 
 A small Flask dashboard for tado° heating: shows current temperature, humidity,
